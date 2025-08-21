@@ -7,7 +7,7 @@ on:
       - '**.tex'
       - '**.png'
       - '**.jpg'
-      - '.github/workflows/build-release.yml'
+      - '.github/workflows/build-resume.yml'
   workflow_dispatch: {}
 
 permissions:
