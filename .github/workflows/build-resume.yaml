@@ -30,7 +30,6 @@ jobs:
           latexmk_use_xelatex: true
           extra_system_packages: |
             fontconfig
-            altacv
             fontawesome5
             academicons
             paracol
