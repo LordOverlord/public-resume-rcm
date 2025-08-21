@@ -30,6 +30,21 @@ jobs:
           latexmk_use_xelatex: true
           extra_system_packages: |
             fontconfig
+            altacv
+            fontawesome5
+            academicons
+            paracol
+            ragged2e
+            xcolor
+            hyperref
+            geometry
+            ifthen
+            etoolbox
+            enumitem
+            csquotes
+            tcolorbox
+            xurl
+            lipsum
 
       - name: Rename built PDF to "latest"
         run: |
