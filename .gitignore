@@ -1,0 +1,13 @@
+# Latex
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.xdv
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.xmpi
+*.pdf

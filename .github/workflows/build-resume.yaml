@@ -1,0 +1,115 @@
+name: Build & Publish Resume (latest + versioned)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**.tex'
+      - '**.png'
+      - '**.jpg'
+      - '.github/workflows/build-release.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    env:
+      PDF_SRC: resume.pdf
+      PDF_LATEST: resume.rafael.camacho.latest.pdf
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build PDF (XeLaTeX)
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: resume.tex
+          latexmk_use_xelatex: true
+          extra_system_packages: |
+            fontconfig
+
+      - name: Rename built PDF to "latest"
+        run: |
+          test -f "$PDF_SRC" || { echo "No se encontró $PDF_SRC"; exit 1; }
+          cp "$PDF_SRC" "$PDF_LATEST"
+
+      - name: Install jq (for JSON parsing)
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Ensure gh cli auth
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh auth status
+
+      - name: Determine next version & archive previous latest (if any)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          REPO="${GITHUB_REPOSITORY}"
+
+          # Función para listar tags tipo vN y obtener el mayor N
+          get_max_v() {
+            gh release list --limit 200 --repo "$REPO" --json tagName \
+            | jq -r '.[].tagName' \
+            | grep -E '^v[0-9]+$' || true
+          }
+
+          # ¿Existe release/tag 'latest'?
+          if gh release view latest --repo "$REPO" >/dev/null 2>&1; then
+            echo "Hay release 'latest'. Archivando PDF anterior como versión..."
+
+            # Descarga el asset anterior de 'latest' si existe
+            mkdir -p prev_latest
+            if gh release download latest --repo "$REPO" \
+                 --pattern "resume.rafael.camacho.latest.pdf" \
+                 --dir prev_latest >/dev/null 2>&1; then
+              echo "Asset anterior descargado."
+
+              # Calcula siguiente número de versión a partir de tags vN existentes
+              MAX_TAG=$(get_max_v | sed 's/^v//' | sort -n | tail -n1)
+              if [ -z "${MAX_TAG:-}" ]; then
+                NEXT=1
+              else
+                NEXT=$((MAX_TAG + 1))
+              fi
+
+              # Renombra a vN y crea release versionado con ese asset
+              PREV="prev_latest/resume.rafael.camacho.latest.pdf"
+              NEW="resume.rafael.camacho.v${NEXT}.pdf"
+              mv "$PREV" "$NEW"
+
+              gh release create "v${NEXT}" "$NEW" \
+                --repo "$REPO" \
+                --title "v${NEXT}" \
+                --notes "Archived from 'latest' on $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+              echo "Archivado como v${NEXT}."
+            else
+              echo "No había asset previo en 'latest' (primer uso con release ya creado)."
+            fi
+
+            # Sube (o reemplaza) el nuevo PDF a 'latest'
+            gh release upload latest "$PDF_LATEST" --repo "$REPO" --clobber
+            # Asegura que este release quede marcado como el más reciente
+            gh release edit latest --repo "$REPO" --latest
+
+          else
+            echo "No existe release 'latest'. Creándolo…"
+            gh release create latest "$PDF_LATEST" \
+              --repo "$REPO" \
+              --title "latest" \
+              --notes "Initial latest build on $(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+              --latest
+          fi
+
+      - name: Upload workflow artifact (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PDF_LATEST }}
+          path: ${{ env.PDF_LATEST }}
+          retention-days: 7

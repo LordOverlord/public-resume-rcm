@@ -1,0 +1,59 @@
+% Skills
+\cvsection{Skills}
+\cvtag{AWS} \cvtag{Azure} \cvtag{GCP} \cvtag{Kubernetes} \cvtag{Docker}
+\cvtag{Terraform} \cvtag{Ansible} \cvtag{CI/CD} \cvtag{Linux/Windows}
+\cvtag{SQL/NoSQL} \cvtag{Datadog} \cvtag{New Relic} \cvtag{Confluence}
+
+
+% Lenguajes / Scripting
+\skillbadge{pythonbrand}{\faPython\; Python}
+\skillbadge{powershell}{\faCode\, PowerShell}
+\skillbadge{bash}{\faTerminal\; Bash/Shell}
+\skillbadge{markdown}{\simpleicon{markdown}\, Markdown}
+\skillbadge{gitbrand}{\faCodeBranch\; Git}
+
+% Cloud
+\skillbadge{aws}{\faAws\; AWS}
+\skillbadge{gcp}{\simpleicon{googlecloud}\, Google Cloud}
+\skillbadge{azure}{\faCloud\, Azure}
+
+% Containers / Orquestación
+\skillbadge{docker}{\faDocker\; Docker}
+\skillbadge{podman}{\simpleicon{podman}\, Podman}
+\skillbadge{kubernetes}{\simpleicon{kubernetes}\, Kubernetes}
+\skillbadge{openshift}{\simpleicon{openshift}\, OpenShift}
+\skillbadge{terraform}{\simpleicon{terraform}\, Terraform}
+\skillbadge{ansible}{\simpleicon{ansible}\, Ansible}
+\skillbadge{arm}{\simpleicon{azurearm}\, Azure ARM}
+\skillbadge{bicep}{\simpleicon{azurebicep}\, Azure Bicep}
+\skillbadge{cdk}{\simpleicon{awsclouddevelopmentkit}\, AWS CDK}
+\skillbadge{helm}{\simpleicon{helm}\, Helm}
+
+% CI/CD
+\skillbadge{azuredevops}{\simpleicon{azuredevops}\, Azure DevOps}
+\skillbadge{githubactions}{\simpleicon{githubactions}\, GitHub Actions}
+\skillbadge{jenkins}{\simpleicon{jenkins}\, Jenkins}
+\skillbadge{gitlabci}{\simpleicon{gitlabci}\, GitLab CI}
+
+% Observabilidad
+\skillbadge{datadog}{\simpleicon{datadog}\, Datadog}
+\skillbadge{newrelic}{\simpleicon{newrelic}\, New Relic}
+
+% Bases de datos / Mensajería / Web
+\skillbadge{mssql}{\simpleicon{microsoftsqlserver}\, SQL Server}
+\skillbadge{postgres}{\simpleicon{postgresql}\, PostgreSQL}
+\skillbadge{mongodb}{\simpleicon{mongodb}\, MongoDB}
+\skillbadge{kafka}{\simpleicon{apachekafka}\, Apache Kafka}
+\skillbadge{nginx}{\simpleicon{nginx}\, Nginx}
+
+% SO / Otros
+\skillbadge{linuxbrand}{\faLinux\; Linux}
+\skillbadge{notion}{\simpleicon{notion}\, Notion}
+\skillbadge{confluence}{\simpleicon{confluence}\, Confluence}
+\skillbadge{jira}{\simpleicon{jira}\, Jira}
+
+
+% Compat: iconos viejos de FA5 que usa altacv -> nombres nuevos de FA7
+\makeatletter
+\renewcommand{\cvLocationMarker}{\faIcon{location-dot}} % FA7
+\makeatother
