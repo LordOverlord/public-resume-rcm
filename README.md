@@ -44,6 +44,6 @@ El PDF resultante se genera como:
 resume.rafael.camacho.latest.pdf
 
 ## 📬 Contacto
-- 🌐 [LinkedIn](https://www.linkedin.com/in/lordoverlord/)  
-- 📧 [overlordco@gmail.com](mailto:overlordco@gmail.com)  
+- 🌐 [LinkedIn](https://www.linkedin.com/in/lordoverlord/)
+- 📧 [overlordco@gmail.com](mailto:overlordco@gmail.com)
 - 📍 CDMX, México
