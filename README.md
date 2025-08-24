@@ -16,6 +16,7 @@ Este repositorio contiene mi CV en formato **LaTeX** (basado en [AltaCV](https:/
 
 ## 📂 Estructura del repo
 
+```bash
 .
 ├── resume.tex # Archivo principal del CV
 ├── resume.cls / altacv.cls # Plantilla usada (AltaCV)
@@ -24,6 +25,7 @@ Este repositorio contiene mi CV en formato **LaTeX** (basado en [AltaCV](https:/
 │ └── build.yml # Pipeline de GitHub Actions
 ├── .gitignore # Archivos temporales de LaTeX
 └── README.md # Este archivo
+```
 
 ---
 
@@ -34,7 +36,7 @@ Este repositorio contiene mi CV en formato **LaTeX** (basado en [AltaCV](https:/
 - `latexmk` y paquetes estándar de LaTeX
 
 ### Compilación
-```bash
+
 latexmk -pdf resume.tex
 
 El PDF resultante se genera como:
