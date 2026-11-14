@@ -34,7 +34,9 @@ jobs:
         with:
           root_file: resume.tex
           latexmk_use_xelatex: true
-          texlive_version: '2025'
+          # latex-action v3 maps 2025 to the moving 'latest' image.
+          # TeX Live 2024 resolves to a fixed 2025-03-01 container tag.
+          texlive_version: '2024'
 
       - name: Validate PDF
         shell: bash
