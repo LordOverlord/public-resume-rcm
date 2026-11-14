@@ -46,6 +46,67 @@ jobs:
           file resume.pdf | grep -q 'PDF document'
           sha256sum resume.pdf
 
+      - name: ATS text extraction smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v pdftotext >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq poppler-utils
+          fi
+          pdftotext -raw -enc UTF-8 resume.pdf resume-extracted.txt
+          python3 - <<'PY'
+          import re
+          import unicodedata
+          from pathlib import Path
+
+          extracted = Path("resume-extracted.txt").read_text(encoding="utf-8")
+          pages = [p for p in extracted.split("\\f") if p.strip()]
+
+          def clean(text):
+              text = unicodedata.normalize("NFKC", text).casefold()
+              return re.sub(r"\\s+", " ", text).strip()
+
+          body = clean(extracted)
+          required = {
+              "candidate": "Rafael Camacho",
+              "email": "overlordco@gmail.com",
+              "phone": "+52 55 2137 2936",
+              "LinkedIn": "LinkedIn: lordoverlord",
+              "GitHub": "GitHub: LordOverlord",
+              "experience": "EXPERIENCE",
+              "Levi's": "Levi",
+              "Goldman Sachs": "Goldman Sachs",
+              "Herbalife": "Herbalife",
+              "AWS certification": "AWS Certified AI Practitioner",
+              "Google badge": "Google Cloud Essentials",
+              "Skills": "SKILLS",
+              "Kubernetes": "Kubernetes",
+              "Terraform": "Terraform",
+              "Traefik": "Traefik",
+              "Oracle": "Oracle",
+              "education": "UNITEC",
+          }
+          errors = [name for name, needle in required.items() if clean(needle) not in body]
+          if errors:
+              raise SystemExit("Missing ATS fields: " + ", ".join(errors))
+
+          if len(pages) != 4:
+              raise SystemExit(f"Expected 4 PDF pages, extracted {len(pages)}")
+          if "levi" not in clean(pages[0]):
+              raise SystemExit("Levi's must appear on page 1")
+          if "goldman sachs" not in clean(pages[1]) or "goldman sachs" in clean(pages[0]):
+              raise SystemExit("Goldman Sachs must begin on page 2")
+          if clean(extracted).find("levi") > clean(extracted).find("goldman sachs"):
+              raise SystemExit("Experience order is incorrect")
+          if "Date:" in extracted or "Location:" in extracted:
+              raise SystemExit("Synthetic Date/Location labels leaked into text extraction")
+          if any(char in extracted for char in ("ē", "\\x8a", "\\ufffd")):
+              raise SystemExit("Decorative icon glyphs leaked into text extraction")
+
+          print(f"ATS smoke test passed: {len(required)} fields, {len(pages)} pages.")
+          PY
+
       # Preserve the PDF even if the later publication job fails.
       - name: Upload validated PDF
         uses: actions/upload-artifact@v4
