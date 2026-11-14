@@ -61,11 +61,11 @@ jobs:
           from pathlib import Path
 
           extracted = Path("resume-extracted.txt").read_text(encoding="utf-8")
-          pages = [p for p in extracted.split("\\f") if p.strip()]
+          pages = [p for p in extracted.split("\f") if p.strip()]
 
           def clean(text):
               text = unicodedata.normalize("NFKC", text).casefold()
-              return re.sub(r"\\s+", " ", text).strip()
+              return re.sub(r"\s+", " ", text).strip()
 
           body = clean(extracted)
           required = {
@@ -101,7 +101,7 @@ jobs:
               raise SystemExit("Experience order is incorrect")
           if "Date:" in extracted or "Location:" in extracted:
               raise SystemExit("Synthetic Date/Location labels leaked into text extraction")
-          if any(char in extracted for char in ("ē", "\\x8a", "\\ufffd")):
+          if any(char in extracted for char in ("ē", "\x8a", "\ufffd")):
               raise SystemExit("Decorative icon glyphs leaked into text extraction")
 
           print(f"ATS smoke test passed: {len(required)} fields, {len(pages)} pages.")
