@@ -29,15 +29,40 @@
 \definecolor{emphasis}{HTML}{1ABC9C}
 \definecolor{body}{HTML}{333333}
 
+% ATS-friendly text layer: keep icon glyphs visual, but suppress them when
+% copying/extracting PDF text. Links remain clickable and text stays selectable.
+\newcommand{\cvdecorativeicon}[1]{%
+  \BeginAccSupp{method=escape,ActualText={}}#1\EndAccSupp{}%
+}
+\newcommand{\cvcontact}[3]{%
+  \mbox{\href{#1}{\cvdecorativeicon{#2}\hspace{0.25em}#3}}\hspace{1em}%
+}
+
+% Override only the local event layout, not the upstream AltaCV class.
+% Preserve the existing two-column visual alignment but remove the synthetic
+% "Date:" and "Location:" ActualText that leaked into unrelated lines.
+\renewcommand{\cvevent}[4]{%
+  {\large\color{emphasis}#1\par}%
+  \smallskip\normalsize
+  \ifstrequal{#2}{}{}{\textbf{\color{accent}#2}\par\smallskip}%
+  \ifstrequal{#3}{}{}{%
+    {\small\makebox[0.5\linewidth][l]{\cvdecorativeicon{\cvDateMarker}~#3}}%
+  }%
+  \ifstrequal{#4}{}{}{%
+    {\small\makebox[0.5\linewidth][l]{\cvdecorativeicon{\cvLocationMarker}~#4}}%
+  }\par
+  \medskip\normalsize
+}
+
 % Header
 \name{Rafael Camacho}
 \tagline{Senior Cloud \& Platform Operations Engineer}
 \photoR{3cm}{avatar} % optional photo placeholder
 \personalinfo{
-  \phone{+52 55 2137 2936}
-  \email{overlordco@gmail.com}
-  \linkedin{lordoverlord}
-  \github{LordOverlord}
+  \cvcontact{tel:+52 55 2137 2936}{\faPhone}{+52 55 2137 2936}
+  \cvcontact{mailto:overlordco@gmail.com}{\faAt}{overlordco@gmail.com}
+  \cvcontact{https://linkedin.com/in/lordoverlord}{\faLinkedin}{LinkedIn: lordoverlord}
+  \cvcontact{https://github.com/LordOverlord}{\faGithub}{GitHub: LordOverlord}
 }
 
 \begin{document}
@@ -49,17 +74,17 @@ Senior Cloud \& Platform Operations Engineer with 10+ years of experience drivin
 
 % Certifications
 \cvsection{Certifications}
-\cvtag{\faAws \; \href{https://www.credly.com/badges/081f1455-8f4c-485f-b48c-b775c376ed84/public_url}{AWS Certified AI Practitioner}}
-\cvtag{\faAws \; \href{https://www.credly.com/badges/2d83dc4b-4889-4f3b-a320-2d0bf3a392d1/public_url}{AWS Certified Cloud Practitioner}}
+\cvtag{\cvdecorativeicon{\faAws}\; \href{https://www.credly.com/badges/081f1455-8f4c-485f-b48c-b775c376ed84/public_url}{AWS Certified AI Practitioner}}
+\cvtag{\cvdecorativeicon{\faAws}\; \href{https://www.credly.com/badges/2d83dc4b-4889-4f3b-a320-2d0bf3a392d1/public_url}{AWS Certified Cloud Practitioner}}
 
 \cvsection{Training \& Badges}
 {\footnotesize
-\cvtag{\faGoogle \; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/3128745}{Infrastructure and Application Modernization with Google Cloud}}
-\cvtag{\faGoogle \; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/3128639}{Innovating with Data and Google Cloud}}
-\cvtag{\faGoogle \; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/3128595}{Digital Transformation with Google Cloud}}
-\cvtag{\faGoogle \; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/1741469}{Kubernetes in Google Cloud}}
-\cvtag{\faGoogle \; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/1582311}{Cloud Engineering}}
-\cvtag{\faGoogle \; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/1558210}{Google Cloud Essentials}}
+\cvtag{\cvdecorativeicon{\faGoogle}\; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/3128745}{Infrastructure and Application Modernization with Google Cloud}}
+\cvtag{\cvdecorativeicon{\faGoogle}\; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/3128639}{Innovating with Data and Google Cloud}}
+\cvtag{\cvdecorativeicon{\faGoogle}\; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/3128595}{Digital Transformation with Google Cloud}}
+\cvtag{\cvdecorativeicon{\faGoogle}\; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/1741469}{Kubernetes in Google Cloud}}
+\cvtag{\cvdecorativeicon{\faGoogle}\; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/1582311}{Cloud Engineering}}
+\cvtag{\cvdecorativeicon{\faGoogle}\; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/1558210}{Google Cloud Essentials}}
 }
 
 \cvsection{Skills}
