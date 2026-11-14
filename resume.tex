@@ -1,84 +1,27 @@
-% Resume in LaTeX - Draft for Rafael Camacho
-% Suggested template: altacv (clean, ATS-friendly, professional)
+% Resume in LaTeX - Rafael Camacho
+% Based on AltaCV
 
 \documentclass[10pt,a4paper,withhyper]{altacv}
 
 % Page setup
-\geometry{left=1.2cm,right=1.2cm,top=1.2cm,bottom=1.2cm,columnsep=0.7cm}
-\setlength{\parindent}{0pt}
+\geometry{left=1.2cm,right=1.2cm,top=1.2cm,bottom=1.2cm}
 \tracinglostchars=3
 
-% --- Badges estilo shields ---
+% Typography
 \renewcommand{\familydefault}{\sfdefault}
-\usepackage{tcolorbox}
-\usepackage{fontawesome5}   % opcional: íconos genéricos (Docker, Linux, Git, AWS, etc.)
-\usepackage{simpleicons}    % logos de marcas: Markdown, Nginx, Datadog, GCP, etc.
-\usepackage{academicons}    % íconos de academicons (para badges académicos/certificaciones)
 
-\newcommand{\si}[1]{{\simpleicon{#1}}\normalfont}
-
-% Colores de marca (tomados de tus shields)
-\definecolor{aws}{HTML}{FF9900}
+% Colors used in the skills matrix and resume styling
 \definecolor{azure}{HTML}{0072C6}
-\definecolor{gcp}{HTML}{4285F4}
-\definecolor{docker}{HTML}{2496ED}
 \definecolor{kubernetes}{HTML}{326CE5}
 \definecolor{terraform}{HTML}{5835CC}
-\definecolor{ansible}{HTML}{1A1918}
 \definecolor{datadog}{HTML}{632CA6}
-\definecolor{newrelic}{HTML}{1CE783}
 \definecolor{gitbrand}{HTML}{F05032}
-\definecolor{linuxbrand}{HTML}{FCC624}
-\definecolor{powershell}{HTML}{5391FE}
 \definecolor{pythonbrand}{HTML}{3776AB}
-\definecolor{bash}{HTML}{121011}
-\definecolor{markdown}{HTML}{000000}
 \definecolor{nginx}{HTML}{009639}
 \definecolor{mssql}{HTML}{CC2927}
-\definecolor{mongodb}{HTML}{4EA94B}
-\definecolor{postgres}{HTML}{316192}
-\definecolor{azuredevops}{HTML}{0078D7}
-\definecolor{podman}{HTML}{892CA0}
-\definecolor{notion}{HTML}{000000}
-\definecolor{arduino}{HTML}{00979D}
 \definecolor{confluence}{HTML}{172BF4}
-\definecolor{jira}{HTML}{0A0FFF}
-\definecolor{kafka}{HTML}{000000}
-\definecolor{openshift}{HTML}{EE0000}     % Red Hat / OpenShift red
-\definecolor{arm}{HTML}{0078D4}           % Azure brand blue (ARM)
-\definecolor{bicep}{HTML}{00B3F0}         % Azure Bicep cyan aprox.
-\definecolor{cdk}{HTML}{FF9900}           % AWS CDK (usa el naranja AWS)
-\definecolor{helm}{HTML}{0F1689}          % Helm navy
-\definecolor{githubactions}{HTML}{2088FF} % GitHub Actions blue
-\definecolor{jenkins}{HTML}{D33833}       % Jenkins red
-\definecolor{gitlabci}{HTML}{FC6D26}      % GitLab orange
-\definecolor{windowsbrand}{HTML}{0078D7}  % Windows blue
-\definecolor{argocd}{HTML}{F47E2B}        % Argo CD orange
-\definecolor{CICD}{HTML}{6A737D}          % General CI/CD gray
-\definecolor{golang}{HTML}{00ADD8}        % General Go blue
-\definecolor{kyverno}{HTML}{4C9A2A}       % Kyverno green
-\definecolor{prometheus}{HTML}{FFCA28}    % Prometheus yellow
-\definecolor{grafana}{HTML}{F46800}       % Grafana orange
-\definecolor{openshift}{HTML}{EE0000}     % OpenShift
-\definecolor{velero}{HTML}{FCA121}        % Velero orange
-\definecolor{containerd}{HTML}{0C73B8}    % containerd blue
-\definecolor{podman}{HTML}{892CA0}        % Podman purple
-\definecolor{istio}{HTML}{0D6EFD}         % Istio blue
 \definecolor{LinkedInBlue}{HTML}{0A66C2}  % LinkedIn blue
 
-
-% Macro de badge: fondo + borde del color que pases
-\newcommand{\skillbadge}[2]{%
-  \tcbox[
-    on line,
-    colback=#1!12,
-    colframe=#1!60!black,
-    boxrule=0.35pt,
-    arc=3pt,
-    left=4pt,right=4pt,top=2pt,bottom=2pt,
-    boxsep=1.5pt
-  ]{#2}%
-}
 
 % Colors
 \definecolor{heading}{HTML}{2E4053}
@@ -86,15 +29,40 @@
 \definecolor{emphasis}{HTML}{1ABC9C}
 \definecolor{body}{HTML}{333333}
 
+% ATS-friendly text layer: keep icon glyphs visual, but suppress them when
+% copying/extracting PDF text. Links remain clickable and text stays selectable.
+\newcommand{\cvdecorativeicon}[1]{%
+  \BeginAccSupp{method=escape,ActualText={}}#1\EndAccSupp{}%
+}
+\newcommand{\cvcontact}[3]{%
+  \mbox{\href{#1}{\cvdecorativeicon{#2}\hspace{0.25em}#3}}\hspace{1em}%
+}
+
+% Override only the local event layout, not the upstream AltaCV class.
+% Preserve the existing two-column visual alignment but remove the synthetic
+% "Date:" and "Location:" ActualText that leaked into unrelated lines.
+\renewcommand{\cvevent}[4]{%
+  {\large\color{emphasis}#1\par}%
+  \smallskip\normalsize
+  \ifstrequal{#2}{}{}{\textbf{\color{accent}#2}\par\smallskip}%
+  \ifstrequal{#3}{}{}{%
+    {\small\makebox[0.5\linewidth][l]{\cvdecorativeicon{\cvDateMarker}~#3}}%
+  }%
+  \ifstrequal{#4}{}{}{%
+    {\small\makebox[0.5\linewidth][l]{\cvdecorativeicon{\cvLocationMarker}~#4}}%
+  }\par
+  \medskip\normalsize
+}
+
 % Header
 \name{Rafael Camacho}
-\tagline{Senior Associate DevOps Engineer}
+\tagline{Senior Cloud \& Platform Operations Engineer}
 \photoR{3cm}{avatar} % optional photo placeholder
 \personalinfo{
-  \phone{+52 55 2137 2936}
-  \email{overlordco@gmail.com}
-  \linkedin{lordoverlord}
-  \github{LordOverlord}
+  \cvcontact{tel:+52 55 2137 2936}{\faPhone}{+52 55 2137 2936}
+  \cvcontact{mailto:overlordco@gmail.com}{\faAt}{overlordco@gmail.com}
+  \cvcontact{https://linkedin.com/in/lordoverlord}{\faLinkedin}{LinkedIn: lordoverlord}
+  \cvcontact{https://github.com/LordOverlord}{\faGithub}{GitHub: LordOverlord}
 }
 
 \begin{document}
@@ -102,79 +70,69 @@
 
 % Summary
 \cvsection{Summary}
-DevOps and Cloud Engineer with experience designing and supporting cloud infrastructure across AWS, Azure, and GCP. Skilled in Kubernetes, Terraform, Ansible, CI/CD pipelines, and observability tools. Recognized for building secure, scalable, and automated environments, with strong documentation and collaboration skills.
+Senior Cloud \& Platform Operations Engineer with 10+ years of experience driving reliable, secure, and scalable infrastructure operations across enterprise environments. Proven background in business-critical incident management, multi-cloud platform support, infrastructure automation, and cross-functional delivery. Combines hands-on engineering expertise with a continuous-improvement mindset to strengthen service resilience, streamline operational processes, and support business continuity.
 
 % Certifications
 \cvsection{Certifications}
-\cvtag{\faAws \; AWS Cloud Practitioner}
-\cvtag{\faCloud \; Cloud Engineering Badge}
-\cvtag{\faDharmachakra \; Kubernetes in Google Cloud Badge}
+\cvtag{\cvdecorativeicon{\faAws}\; \href{https://www.credly.com/badges/081f1455-8f4c-485f-b48c-b775c376ed84/public_url}{AWS Certified AI Practitioner}}
+\cvtag{\cvdecorativeicon{\faAws}\; \href{https://www.credly.com/badges/2d83dc4b-4889-4f3b-a320-2d0bf3a392d1/public_url}{AWS Certified Cloud Practitioner}}
+
+\cvsection{Training \& Badges}
+{\footnotesize
+\cvtag{\cvdecorativeicon{\faGoogle}\; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/3128745}{Infrastructure and Application Modernization with Google Cloud}}
+\cvtag{\cvdecorativeicon{\faGoogle}\; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/3128639}{Innovating with Data and Google Cloud}}
+\cvtag{\cvdecorativeicon{\faGoogle}\; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/3128595}{Digital Transformation with Google Cloud}}
+\cvtag{\cvdecorativeicon{\faGoogle}\; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/1741469}{Kubernetes in Google Cloud}}
+\cvtag{\cvdecorativeicon{\faGoogle}\; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/1582311}{Cloud Engineering}}
+\cvtag{\cvdecorativeicon{\faGoogle}\; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/1558210}{Google Cloud Essentials}}
+}
 
 \cvsection{Skills}
 
-% Lenguajes / Scripting
-\skillbadge{golang}{\faCogs\; Go}
-\skillbadge{pythonbrand}{\faPython\; Python}
-\skillbadge{powershell}{\faCode\; PowerShell}
-\skillbadge{bash}{\faTerminal\; Bash/Shell}
-\skillbadge{gitbrand}{\faCodeBranch\; Git}
-
-% Cloud
-\skillbadge{aws}{\faAws\; AWS}
-\skillbadge{gcp}{\faGoogle\; Google Cloud}
-\skillbadge{azure}{\faCloud\; Azure}
-
-% Containers / Orquestación
-\skillbadge{docker}{\faDocker\; Docker}
-\skillbadge{kubernetes}{\faProjectDiagram\; Kubernetes}
-\skillbadge{openshift}{\faProjectDiagram\; OpenShift}
-\skillbadge{containerd}{\faCubes\; containerd}
-\skillbadge{podman}{\faCubes\; Podman}
-
-% IaC / Configuración
-\skillbadge{terraform}{\faCubes\; Terraform}
-\skillbadge{bicep}{\faCubes\; Bicep}
-\skillbadge{ansible}{\faCogs\; Ansible}
-\skillbadge{helm}{\faAnchor\; Helm}
-\skillbadge{kyverno}{\faLock\; Kyverno}
-\skillbadge{velero}{\faLifeRing\; Velero}
-\skillbadge{istio}{\faProjectDiagram\; Istio}
-
-% CI/CD
-\skillbadge{CICD}{\faSync\; CI/CD}
-\skillbadge{azuredevops}{\faProjectDiagram\; Azure DevOps}
-\skillbadge{githubactions}{\faGithub\; GitHub Actions}
-\skillbadge{gitlabci}{\faGitlab\; GitLab CI}
-\skillbadge{jenkins}{\faTools\; Jenkins}
-\skillbadge{argocd}{\faProjectDiagram\; ArgoCD}
-
-% Observabilidad
-\skillbadge{datadog}{\faChartLine\; Datadog}
-\skillbadge{newrelic}{\faChartLine\; New Relic}
-\skillbadge{prometheus}{\faChartLine\; Prometheus}
-\skillbadge{grafana}{\faChartBar\; Grafana}
-
-% Bases de datos / Mensajería / Web
-\skillbadge{mssql}{\faDatabase\; SQL Server}
-\skillbadge{postgres}{\faDatabase\; PostgreSQL}
-\skillbadge{mongodb}{\faDatabase\; MongoDB}
-\skillbadge{kafka}{\faStream\; Apache Kafka}
-\skillbadge{nginx}{\faServer\; Nginx}
-
-% SO / Otros
-\skillbadge{linuxbrand}{\faLinux\; Linux}
-\skillbadge{windowsbrand}{\faWindows\; Windows}
-
-% Documentation
-\skillbadge{markdown}{\faMarkdown\; Markdown}
-\skillbadge{notion}{\faStickyNote\; Notion}
-\skillbadge{confluence}{\faBook\; Confluence}
-\skillbadge{jira}{\faTasks\; Jira}
+% Balanced two-column category matrix, with a single subtle border.
+\begin{tcolorbox}[
+  colback=white, colframe=heading!35, boxrule=0.4pt,
+  arc=2pt, left=8pt, right=8pt, top=8pt, bottom=8pt, boxsep=0pt
+]
+\footnotesize
+\newcommand{\cvskillgroup}[3]{\textcolor{#1}{\bfseries #2}\newline #3}
+\renewcommand{\arraystretch}{1.55}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X@{\hspace{1.4em}}>{\raggedright\arraybackslash}X@{}}
+  \cvskillgroup{azure}{Cloud}{AWS, Azure, Google Cloud} & \cvskillgroup{kubernetes}{Containers \& Orchestration}{Docker, Kubernetes, OpenShift, containerd, Podman, Helm} \\
+  \cvskillgroup{pythonbrand}{Scripting \& Tools}{Go, Python, PowerShell, Bash/Shell, Git} & \cvskillgroup{terraform}{Infrastructure as Code}{Terraform, Bicep, Ansible} \\
+  \cvskillgroup{gitbrand}{Delivery \& Automation}{Azure DevOps, GitHub Actions, GitLab CI, Jenkins, ArgoCD} & \cvskillgroup{datadog}{Observability}{Datadog, New Relic, Prometheus, Grafana} \\
+  \cvskillgroup{mssql}{Databases}{SQL Server, PostgreSQL, MongoDB, Oracle} & \cvskillgroup{nginx}{Networking \& Web}{Nginx, Traefik} \\
+  \cvskillgroup{heading}{Operating Systems}{Linux, Windows} & \cvskillgroup{confluence}{Collaboration}{Markdown, Confluence, Jira}
+\end{tabularx}
+\end{tcolorbox}
 
 % Experience
 \cvsection{Experience}
 
-\cvevent{Lead Cloud Engineer III}{Herbalife}{2024 -- Present}{CDMX}
+\cvevent{Platform Ops Engineer}{Levi's}{2026 -- Present}{CDMX}
+\begin{itemize}
+  \item Contributed to the stability and availability of business-critical retail platforms through enterprise infrastructure support and incident management.
+  \item Collaborated with cross-functional teams to assess production issues, coordinate escalations, and support timely service recovery.
+  \item Performed structured troubleshooting across Windows, IIS, SQL Server, and enterprise monitoring services to identify and address operational risks.
+  \item Executed infrastructure maintenance and operational changes in alignment with change-management processes and production controls.
+  \item Maintained operational visibility through technical documentation, incident tracking, stakeholder updates, and post-change validation.
+\end{itemize}
+
+% Keep first role on page one; Goldman Sachs starts the next page.
+\newpage
+
+\cvevent{Cloud Engineer}{Goldman Sachs}{2025 -- Present}{CDMX}
+\begin{itemize}
+  \item Supported cloud and application platform operations for business-critical financial services through incident management and operational monitoring.
+  \item Partnered with development and infrastructure teams on initiatives to strengthen centralized logging and service observability.
+  \item Contributed to platform automation and configuration improvements using established CI/CD workflows, technical reviews, and change validation.
+  \item Supported operational security requirements, including digital certificate workflows and controlled production activities.
+  \item Managed assigned engineering and support deliverables through analysis, implementation, validation, and stakeholder follow-up, tracking risks and dependencies in Jira.
+\end{itemize}
+
+\divider
+
+\cvevent{Lead Cloud Engineer III}{Herbalife}{2024 -- 2026}{CDMX}
 \begin{itemize}
   \item Designed and supported multi-cloud infrastructure across Azure, AWS, and GCP.
   \item Deployed and managed Kubernetes clusters (AKS, EKS, GKE).
@@ -196,8 +154,6 @@ DevOps and Cloud Engineer with experience designing and supporting cloud infrast
 
 \divider
 
-\newpage
-
 \cvevent{Senior Associate DevOps Engineer}{KPMG (KTSA)}{2022 -- 2024}{CDMX}
 \begin{itemize}
   \item Designed, implemented, and supported hybrid infrastructure on Azure and AWS.
@@ -218,7 +174,7 @@ DevOps and Cloud Engineer with experience designing and supporting cloud infrast
   \item Strengthened security posture by implementing IAM policies and secrets management (Vault, GCP KMS).
 \end{itemize}
 
-\divider
+\newpage
 
 \cvevent{Senior DevOps Cloud Admin L2}{Wabtec Corporation}{2021 -- 2022}{CDMX}
 \begin{itemize}
@@ -253,8 +209,6 @@ DevOps and Cloud Engineer with experience designing and supporting cloud infrast
 
 \divider
 
-\newpage
-
 \cvevent{TI App Support Analyst}{NAD Global}{2016 -- 2017}{CDMX}
 \begin{itemize}
   \item Supported ASP.NET applications and SQL Server databases.
@@ -275,11 +229,11 @@ DevOps and Cloud Engineer with experience designing and supporting cloud infrast
   \item Collaborated with cross-functional teams to resolve complex infrastructure issues.
 \end{itemize}
 
-\divider\smallskip
+\newpage
 
 % Education
 \cvsection{Education}
-\cvevent{B.S. Computer Software Engineering}{UNITEC}{2017 -- Expected 2026}{CDMX}
+\cvevent{B.S. Computer Software Engineering}{UNITEC}{2017 -- Expected 2027}{CDMX}
 \begin{itemize}
   \item Focus on Cloud Engineering, DevOps, and Infrastructure Automation.
   \item Coursework includes Databases, Software Architecture, and Distributed Systems.

@@ -1,129 +1,233 @@
-name: Build & Publish Resume (latest + versioned)
+name: Build and Publish Resume
 
 on:
+  # Validate every PR so the build check can be required by branch protection.
+  pull_request:
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - '**.tex'
+      - '**.cls'
       - '**.png'
       - '**.jpg'
+      - '**.jpeg'
+      - '**.ttf'
+      - '**.otf'
       - '.github/workflows/build-resume.yaml'
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  build-and-publish:
+  build:
+    name: Build PDF
     runs-on: ubuntu-latest
-    env:
-      PDF_SRC: resume.pdf
-      PDF_LATEST: resume.rafael.camacho.latest.pdf
+    timeout-minutes: 20
     steps:
-      - name: Checkout
+      - name: Check out source
         uses: actions/checkout@v4
 
-      - name: Build PDF (XeLaTeX)
+      - name: Compile resume with XeLaTeX
         uses: xu-cheng/latex-action@v3
         with:
           root_file: resume.tex
           latexmk_use_xelatex: true
-          extra_system_packages: |
-            fontconfig
-            fontawesome5
-            academicons
-            paracol
-            ragged2e
-            xcolor
-            hyperref
-            geometry
-            ifthen
-            etoolbox
-            enumitem
-            csquotes
-            tcolorbox
-            xurl
-            lipsum
+          # latex-action v3 maps 2025 to the moving 'latest' image.
+          # TeX Live 2024 resolves to a fixed 2025-03-01 container tag.
+          texlive_version: '2024'
 
-      - name: Rename built PDF to "latest"
+      - name: Validate PDF
+        shell: bash
         run: |
-          test -f "$PDF_SRC" || { echo "No se encontró $PDF_SRC"; exit 1; }
-          cp "$PDF_SRC" "$PDF_LATEST"
+          set -euo pipefail
+          test -s resume.pdf
+          file resume.pdf | grep -q 'PDF document'
+          sha256sum resume.pdf
 
-      - name: Install jq (for JSON parsing)
-        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: ATS text extraction smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v pdftotext >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq poppler-utils
+          fi
+          pdftotext -raw -enc UTF-8 resume.pdf resume-extracted.txt
+          python3 - <<'PY'
+          import re
+          import unicodedata
+          from pathlib import Path
 
-      - name: Ensure gh cli auth
+          extracted = Path("resume-extracted.txt").read_text(encoding="utf-8")
+          pages = [p for p in extracted.split("\f") if p.strip()]
+
+          def clean(text):
+              text = unicodedata.normalize("NFKC", text).casefold()
+              return re.sub(r"\s+", " ", text).strip()
+
+          body = clean(extracted)
+          required = {
+              "candidate": "Rafael Camacho",
+              "email": "overlordco@gmail.com",
+              "phone": "+52 55 2137 2936",
+              "LinkedIn": "LinkedIn: lordoverlord",
+              "GitHub": "GitHub: LordOverlord",
+              "experience": "EXPERIENCE",
+              "Levi's": "Levi",
+              "Goldman Sachs": "Goldman Sachs",
+              "Herbalife": "Herbalife",
+              "AWS certification": "AWS Certified AI Practitioner",
+              "Google badge": "Google Cloud Essentials",
+              "Skills": "SKILLS",
+              "Kubernetes": "Kubernetes",
+              "Terraform": "Terraform",
+              "Traefik": "Traefik",
+              "Oracle": "Oracle",
+              "education": "UNITEC",
+          }
+          errors = [name for name, needle in required.items() if clean(needle) not in body]
+          if errors:
+              raise SystemExit("Missing ATS fields: " + ", ".join(errors))
+
+          if len(pages) != 4:
+              raise SystemExit(f"Expected 4 PDF pages, extracted {len(pages)}")
+          if "levi" not in clean(pages[0]):
+              raise SystemExit("Levi's must appear on page 1")
+          if "goldman sachs" not in clean(pages[1]) or "goldman sachs" in clean(pages[0]):
+              raise SystemExit("Goldman Sachs must begin on page 2")
+          if clean(extracted).find("levi") > clean(extracted).find("goldman sachs"):
+              raise SystemExit("Experience order is incorrect")
+          if "Date:" in extracted or "Location:" in extracted:
+              raise SystemExit("Synthetic Date/Location labels leaked into text extraction")
+          if any(char in extracted for char in ("ē", "\x8a", "\ufffd")):
+              raise SystemExit("Decorative icon glyphs leaked into text extraction")
+
+          print(f"ATS smoke test passed: {len(required)} fields, {len(pages)} pages.")
+          PY
+
+      # Preserve the PDF even if the later publication job fails.
+      - name: Upload validated PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: resume-pdf
+          path: resume.pdf
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish versioned release
+    needs: build
+    if: >-
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+      && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    # Running publications are never cancelled; newer pending jobs may replace
+    # older ones. The HEAD check prevents publishing an outdated build.
+    concurrency:
+      group: resume-publish-${{ github.repository }}
+      cancel-in-progress: false
+    steps:
+      - name: Check out source and release tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download validated PDF
+        uses: actions/download-artifact@v4
+        with:
+          name: resume-pdf
+
+      - name: Publish immutable version
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh auth status
-
-      - name: Determine next version & archive previous latest (if any)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          PDF_ASSET: resume.rafael.camacho.latest.pdf
         run: |
           set -euo pipefail
 
-          REPO="${GITHUB_REPOSITORY}"
+          test -s resume.pdf
+          mv resume.pdf "$PDF_ASSET"
+          expected_size=$(stat -c '%s' "$PDF_ASSET")
+          pdf_sha256=$(sha256sum "$PDF_ASSET" | cut -d' ' -f1)
 
-          # Función para listar tags tipo vN y obtener el mayor N
-          get_max_v() {
-            gh release list --limit 200 --repo "$REPO" --json tagName \
-            | jq -r '.[].tagName' \
-            | grep -E '^v[0-9]+$' || true
-          }
-
-          # ¿Existe release/tag 'latest'?
-          if gh release view latest --repo "$REPO" >/dev/null 2>&1; then
-            echo "Hay release 'latest'. Archivando PDF anterior como versión..."
-
-            # Descarga el asset anterior de 'latest' si existe
-            mkdir -p prev_latest
-            if gh release download latest --repo "$REPO" \
-                 --pattern "resume.rafael.camacho.latest.pdf" \
-                 --dir prev_latest >/dev/null 2>&1; then
-              echo "Asset anterior descargado."
-
-              # Calcula siguiente número de versión a partir de tags vN existentes
-              MAX_TAG=$(get_max_v | sed 's/^v//' | sort -n | tail -n1)
-              if [ -z "${MAX_TAG:-}" ]; then
-                NEXT=1
-              else
-                NEXT=$((MAX_TAG + 1))
-              fi
-
-              # Renombra a vN y crea release versionado con ese asset
-              PREV="prev_latest/resume.rafael.camacho.latest.pdf"
-              NEW="resume.rafael.camacho.v${NEXT}.pdf"
-              mv "$PREV" "$NEW"
-
-              gh release create "v${NEXT}" "$NEW" \
-                --repo "$REPO" \
-                --title "v${NEXT}" \
-                --notes "Archived from 'latest' on $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-
-              echo "Archivado como v${NEXT}."
-            else
-              echo "No había asset previo en 'latest' (primer uso con release ya creado)."
-            fi
-
-            # Sube (o reemplaza) el nuevo PDF a 'latest'
-            gh release upload latest "$PDF_LATEST" --repo "$REPO" --clobber
-            # Asegura que este release quede marcado como el más reciente
-            gh release edit latest --repo "$REPO" --latest
-
-          else
-            echo "No existe release 'latest'. Creándolo…"
-            gh release create latest "$PDF_LATEST" \
-              --repo "$REPO" \
-              --title "latest" \
-              --notes "Initial latest build on $(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
-              --latest
+          # This build must still be main HEAD at publication time.
+          current_head=$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq '.commit.sha')
+          if [[ "$current_head" != "$GITHUB_SHA" ]]; then
+            echo "Skipping stale build $GITHUB_SHA; main is now $current_head."
+            exit 0
           fi
 
-      - name: Upload workflow artifact (optional)
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.PDF_LATEST }}
-          path: ${{ env.PDF_LATEST }}
-          retention-days: 7
+          git fetch --tags --force origin
+
+          # Numeric tags and release drafts both count toward version selection.
+          highest=0
+          existing_tag=""
+          tag_names=$(git tag --list 'v[0-9]*')
+          while IFS= read -r candidate; do
+            if [[ "$candidate" =~ ^v([0-9]+)$ ]]; then
+              number=$((10#${BASH_REMATCH[1]}))
+              if (( number > highest )); then highest=$number; fi
+            fi
+          done <<< "$tag_names"
+
+          releases=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
+            --jq '.[] | [.tag_name, (.target_commitish // "")] | @tsv')
+          while IFS=$'\t' read -r candidate target; do
+            if [[ "$candidate" =~ ^v([0-9]+)$ ]]; then
+              number=$((10#${BASH_REMATCH[1]}))
+              if (( number > highest )); then highest=$number; fi
+              if [[ "$target" == "$GITHUB_SHA" ]]; then
+                if [[ -n "$existing_tag" && "$existing_tag" != "$candidate" ]]; then
+                  echo "::error::Multiple releases reference the same commit."
+                  exit 1
+                fi
+                existing_tag="$candidate"
+              fi
+            fi
+          done <<< "$releases"
+
+          if [[ -n "$existing_tag" ]]; then
+            tag="$existing_tag"
+            is_draft=$(gh release view "$tag" --json isDraft --jq '.isDraft')
+            if [[ "$is_draft" == "false" ]]; then
+              echo "Release $tag already published for commit $GITHUB_SHA."
+              exit 0
+            fi
+            echo "Resuming draft $tag."
+          else
+            tag="v$((highest + 1))"
+            notes=$(printf 'Source commit: %s\nPDF SHA-256: %s\n' "$GITHUB_SHA" "$pdf_sha256")
+            gh release create "$tag" "$PDF_ASSET" \
+              --target "$GITHUB_SHA" \
+              --title "$tag" \
+              --notes "$notes" \
+              --draft
+          fi
+
+          # Retry partial drafts without clobbering assets that already exist.
+          uploaded_size=$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${tag}" \
+            --jq '.assets[] | select(.name == "resume.rafael.camacho.latest.pdf") | .size')
+          if [[ -z "$uploaded_size" ]]; then
+            gh release upload "$tag" "$PDF_ASSET"
+            uploaded_size=$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${tag}" \
+              --jq '.assets[] | select(.name == "resume.rafael.camacho.latest.pdf") | .size')
+          fi
+          if [[ "$uploaded_size" != "$expected_size" ]]; then
+            echo "::error::Release $tag asset size mismatch."
+            exit 1
+          fi
+
+          # No stale draft may become a public release.
+          current_head=$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq '.commit.sha')
+          if [[ "$current_head" != "$GITHUB_SHA" ]]; then
+            echo "Leaving $tag as draft; main moved to $current_head."
+            exit 0
+          fi
+
+          gh release edit "$tag" --draft=false --latest
+          echo "Published $tag from commit $GITHUB_SHA (SHA-256 $pdf_sha256)."
