@@ -11,6 +11,7 @@
 % --- Badges estilo shields ---
 \renewcommand{\familydefault}{\sfdefault}
 \usepackage{tcolorbox}
+\usepackage{tabularx}
 \usepackage{fontawesome5}   % opcional: íconos genéricos (Docker, Linux, Git, AWS, etc.)
 \usepackage{simpleicons}    % logos de marcas: Markdown, Nginx, Datadog, GCP, etc.
 \usepackage{academicons}    % íconos de academicons (para badges académicos/certificaciones)
@@ -39,11 +40,9 @@
 \definecolor{postgres}{HTML}{316192}
 \definecolor{azuredevops}{HTML}{0078D7}
 \definecolor{podman}{HTML}{892CA0}
-\definecolor{notion}{HTML}{000000}
 \definecolor{arduino}{HTML}{00979D}
 \definecolor{confluence}{HTML}{172BF4}
 \definecolor{jira}{HTML}{0A0FFF}
-\definecolor{kafka}{HTML}{000000}
 \definecolor{openshift}{HTML}{EE0000}     % Red Hat / OpenShift red
 \definecolor{arm}{HTML}{0078D4}           % Azure brand blue (ARM)
 \definecolor{bicep}{HTML}{00B3F0}         % Azure Bicep cyan aprox.
@@ -54,16 +53,12 @@
 \definecolor{gitlabci}{HTML}{FC6D26}      % GitLab orange
 \definecolor{windowsbrand}{HTML}{0078D7}  % Windows blue
 \definecolor{argocd}{HTML}{F47E2B}        % Argo CD orange
-\definecolor{CICD}{HTML}{6A737D}          % General CI/CD gray
 \definecolor{golang}{HTML}{00ADD8}        % General Go blue
-\definecolor{kyverno}{HTML}{4C9A2A}       % Kyverno green
 \definecolor{prometheus}{HTML}{FFCA28}    % Prometheus yellow
 \definecolor{grafana}{HTML}{F46800}       % Grafana orange
 \definecolor{openshift}{HTML}{EE0000}     % OpenShift
-\definecolor{velero}{HTML}{FCA121}        % Velero orange
 \definecolor{containerd}{HTML}{0C73B8}    % containerd blue
 \definecolor{podman}{HTML}{892CA0}        % Podman purple
-\definecolor{istio}{HTML}{0D6EFD}         % Istio blue
 \definecolor{LinkedInBlue}{HTML}{0A66C2}  % LinkedIn blue
 
 
@@ -110,69 +105,36 @@ Senior Cloud \& Platform Operations Engineer with 10+ years of experience drivin
 \cvtag{\faAws \; \href{https://www.credly.com/badges/2d83dc4b-4889-4f3b-a320-2d0bf3a392d1/public_url}{AWS Certified Cloud Practitioner}}
 
 \cvsection{Training \& Badges}
-\cvtag{\faCloud \; Cloud Engineering Badge}
-\cvtag{\faDharmachakra \; Kubernetes in Google Cloud Badge}
+{\footnotesize
+\cvtag{\faGoogle \; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/3128745}{Infrastructure and Application Modernization with Google Cloud}}
+\cvtag{\faGoogle \; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/3128639}{Innovating with Data and Google Cloud}}
+\cvtag{\faGoogle \; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/3128595}{Digital Transformation with Google Cloud}}
+\cvtag{\faGoogle \; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/1741469}{Kubernetes in Google Cloud}}
+\cvtag{\faGoogle \; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/1582311}{Cloud Engineering}}
+\cvtag{\faGoogle \; \href{https://www.skills.google/public_profiles/b556a13c-570b-4830-b70f-1d0eac8c6e71/badges/1558210}{Google Cloud Essentials}}
+}
 
 \cvsection{Skills}
 
-% Lenguajes / Scripting
-\skillbadge{golang}{\faCogs\; Go}
-\skillbadge{pythonbrand}{\faPython\; Python}
-\skillbadge{powershell}{\faCode\; PowerShell}
-\skillbadge{bash}{\faTerminal\; Bash/Shell}
-\skillbadge{gitbrand}{\faCodeBranch\; Git}
-
-% Cloud
-\skillbadge{aws}{\faAws\; AWS}
-\skillbadge{gcp}{\faGoogle\; Google Cloud}
-\skillbadge{azure}{\faCloud\; Azure}
-
-% Containers / Orquestación
-\skillbadge{docker}{\faDocker\; Docker}
-\skillbadge{kubernetes}{\faProjectDiagram\; Kubernetes}
-\skillbadge{openshift}{\faProjectDiagram\; OpenShift}
-\skillbadge{containerd}{\faCubes\; containerd}
-\skillbadge{podman}{\faCubes\; Podman}
-
-% IaC / Configuración
-\skillbadge{terraform}{\faCubes\; Terraform}
-\skillbadge{bicep}{\faCubes\; Bicep}
-\skillbadge{ansible}{\faCogs\; Ansible}
-\skillbadge{helm}{\faAnchor\; Helm}
-\skillbadge{kyverno}{\faLock\; Kyverno}
-\skillbadge{velero}{\faLifeRing\; Velero}
-\skillbadge{istio}{\faProjectDiagram\; Istio}
-
-% CI/CD
-\skillbadge{CICD}{\faSync\; CI/CD}
-\skillbadge{azuredevops}{\faProjectDiagram\; Azure DevOps}
-\skillbadge{githubactions}{\faGithub\; GitHub Actions}
-\skillbadge{gitlabci}{\faGitlab\; GitLab CI}
-\skillbadge{jenkins}{\faTools\; Jenkins}
-\skillbadge{argocd}{\faProjectDiagram\; ArgoCD}
-
-% Observabilidad
-\skillbadge{datadog}{\faChartLine\; Datadog}
-\skillbadge{newrelic}{\faChartLine\; New Relic}
-\skillbadge{prometheus}{\faChartLine\; Prometheus}
-\skillbadge{grafana}{\faChartBar\; Grafana}
-
-% Bases de datos / Mensajería / Web
-\skillbadge{mssql}{\faDatabase\; SQL Server}
-\skillbadge{postgres}{\faDatabase\; PostgreSQL}
-\skillbadge{mongodb}{\faDatabase\; MongoDB}
-\skillbadge{kafka}{\faStream\; Apache Kafka}
-\skillbadge{nginx}{\faServer\; Nginx}
-
-% SO / Otros
-\skillbadge{linuxbrand}{\faLinux\; Linux}
-\skillbadge{windowsbrand}{\faWindows\; Windows}
-
-% Documentation
-\skillbadge{markdown}{\faMarkdown\; Markdown}
-\skillbadge{notion}{\faStickyNote\; Notion}
-\skillbadge{confluence}{\faBook\; Confluence}
-\skillbadge{jira}{\faTasks\; Jira}
+% Compact category-colored skill matrix: one block instead of individual badges.
+\begin{tcolorbox}[
+  colback=white, colframe=heading!35, boxrule=0.4pt,
+  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt, boxsep=0pt
+]
+\footnotesize
+\renewcommand{\arraystretch}{1.22}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}X@{}}
+  \textcolor{pythonbrand}{\textbf{Scripting \& Tools}} & Go, Python, PowerShell, Bash/Shell, Git \\
+  \textcolor{azure}{\textbf{Cloud}} & AWS, Azure, Google Cloud \\
+  \textcolor{kubernetes}{\textbf{Containers}} & Docker, Kubernetes, OpenShift, containerd, Podman, Helm \\
+  \textcolor{terraform}{\textbf{Infrastructure as Code}} & Terraform, Bicep, Ansible \\
+  \textcolor{gitbrand}{\textbf{Delivery \& Automation}} & Azure DevOps, GitHub Actions, GitLab CI, Jenkins, ArgoCD \\
+  \textcolor{datadog}{\textbf{Observability}} & Datadog, New Relic, Prometheus, Grafana \\
+  \textcolor{mssql}{\textbf{Databases}} & SQL Server, PostgreSQL, MongoDB, Oracle \\
+  \textcolor{nginx}{\textbf{Networking \& Web}} & Nginx, Traefik \\
+  \textcolor{heading}{\textbf{Systems \& Collaboration}} & Linux, Windows, Markdown, Confluence, Jira
+\end{tabularx}
+\end{tcolorbox}
 
 % Experience
 \cvsection{Experience}
@@ -186,7 +148,8 @@ Senior Cloud \& Platform Operations Engineer with 10+ years of experience drivin
   \item Maintained operational visibility through technical documentation, incident tracking, stakeholder updates, and post-change validation.
 \end{itemize}
 
-\divider
+% Keep first role on page one; Goldman Sachs starts the next page.
+\newpage
 
 \cvevent{Cloud Engineer}{Goldman Sachs}{2025 -- Present}{CDMX}
 \begin{itemize}
@@ -220,8 +183,6 @@ Senior Cloud \& Platform Operations Engineer with 10+ years of experience drivin
 \end{itemize}
 
 \divider
-
-\newpage
 
 \cvevent{Senior Associate DevOps Engineer}{KPMG (KTSA)}{2022 -- 2024}{CDMX}
 \begin{itemize}
