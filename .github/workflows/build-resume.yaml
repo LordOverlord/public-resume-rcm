@@ -15,6 +15,7 @@ on:
       - '**.ttf'
       - '**.otf'
       - '.github/workflows/build-resume.yaml'
+      - '.github/scripts/**'
   workflow_dispatch:
 
 permissions:
@@ -45,6 +46,10 @@ jobs:
           test -s resume.pdf
           file resume.pdf | grep -q 'PDF document'
           sha256sum resume.pdf
+
+      - name: Validate publisher script syntax
+        shell: bash
+        run: bash -n .github/scripts/publish-resume.sh
 
       - name: ATS text extraction smoke test
         shell: bash
@@ -142,92 +147,8 @@ jobs:
         with:
           name: resume-pdf
 
-      - name: Publish immutable version
+      - name: Publish immutable date-stamped release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          PDF_ASSET: resume.rafael.camacho.latest.pdf
-        run: |
-          set -euo pipefail
-
-          test -s resume.pdf
-          mv resume.pdf "$PDF_ASSET"
-          expected_size=$(stat -c '%s' "$PDF_ASSET")
-          pdf_sha256=$(sha256sum "$PDF_ASSET" | cut -d' ' -f1)
-
-          # This build must still be main HEAD at publication time.
-          current_head=$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq '.commit.sha')
-          if [[ "$current_head" != "$GITHUB_SHA" ]]; then
-            echo "Skipping stale build $GITHUB_SHA; main is now $current_head."
-            exit 0
-          fi
-
-          git fetch --tags --force origin
-
-          # Numeric tags and release drafts both count toward version selection.
-          highest=0
-          existing_tag=""
-          tag_names=$(git tag --list 'v[0-9]*')
-          while IFS= read -r candidate; do
-            if [[ "$candidate" =~ ^v([0-9]+)$ ]]; then
-              number=$((10#${BASH_REMATCH[1]}))
-              if (( number > highest )); then highest=$number; fi
-            fi
-          done <<< "$tag_names"
-
-          releases=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
-            --jq '.[] | [.tag_name, (.target_commitish // "")] | @tsv')
-          while IFS=$'\t' read -r candidate target; do
-            if [[ "$candidate" =~ ^v([0-9]+)$ ]]; then
-              number=$((10#${BASH_REMATCH[1]}))
-              if (( number > highest )); then highest=$number; fi
-              if [[ "$target" == "$GITHUB_SHA" ]]; then
-                if [[ -n "$existing_tag" && "$existing_tag" != "$candidate" ]]; then
-                  echo "::error::Multiple releases reference the same commit."
-                  exit 1
-                fi
-                existing_tag="$candidate"
-              fi
-            fi
-          done <<< "$releases"
-
-          if [[ -n "$existing_tag" ]]; then
-            tag="$existing_tag"
-            is_draft=$(gh release view "$tag" --json isDraft --jq '.isDraft')
-            if [[ "$is_draft" == "false" ]]; then
-              echo "Release $tag already published for commit $GITHUB_SHA."
-              exit 0
-            fi
-            echo "Resuming draft $tag."
-          else
-            tag="v$((highest + 1))"
-            notes=$(printf 'Source commit: %s\nPDF SHA-256: %s\n' "$GITHUB_SHA" "$pdf_sha256")
-            gh release create "$tag" "$PDF_ASSET" \
-              --target "$GITHUB_SHA" \
-              --title "$tag" \
-              --notes "$notes" \
-              --draft
-          fi
-
-          # Retry partial drafts without clobbering assets that already exist.
-          uploaded_size=$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${tag}" \
-            --jq '.assets[] | select(.name == "resume.rafael.camacho.latest.pdf") | .size')
-          if [[ -z "$uploaded_size" ]]; then
-            gh release upload "$tag" "$PDF_ASSET"
-            uploaded_size=$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${tag}" \
-              --jq '.assets[] | select(.name == "resume.rafael.camacho.latest.pdf") | .size')
-          fi
-          if [[ "$uploaded_size" != "$expected_size" ]]; then
-            echo "::error::Release $tag asset size mismatch."
-            exit 1
-          fi
-
-          # No stale draft may become a public release.
-          current_head=$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq '.commit.sha')
-          if [[ "$current_head" != "$GITHUB_SHA" ]]; then
-            echo "Leaving $tag as draft; main moved to $current_head."
-            exit 0
-          fi
-
-          gh release edit "$tag" --draft=false --latest
-          echo "Published $tag from commit $GITHUB_SHA (SHA-256 $pdf_sha256)."
+        run: bash .github/scripts/publish-resume.sh
