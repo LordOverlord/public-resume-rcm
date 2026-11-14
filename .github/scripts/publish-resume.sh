@@ -25,10 +25,15 @@ release_rows() {
 }
 
 tag_taken() {
-  local tag="$1"
-  git show-ref --tags --verify --quiet "refs/tags/$tag" ||
-    gh api --paginate "repos/$repo/releases?per_page=100" \
-      --jq '.[].tag_name' | grep -Fxq "$tag"
+  local tag="$1" known
+  if git show-ref --tags --verify --quiet "refs/tags/$tag"; then
+    return 0
+  fi
+  # Do not pipe the paginated API response into grep -q: SIGPIPE and
+  # pipefail could otherwise make an existing tag look available.
+  known=$(gh api --paginate "repos/$repo/releases?per_page=100" \
+    --jq '.[].tag_name')
+  grep -Fxq "$tag" <<< "$known"
 }
 
 asset_info() {
@@ -115,10 +120,16 @@ recover_legacy_draft() {
       -f name="$version_name" --jq '.name' >/dev/null
   fi
 
-  local original_size
+  local original_size original_digest expected_original_hash
   original_size=$(gh api "repos/$repo/releases/$id" \
     --jq ".assets[] | select(.name == \"$version_name\") | .size")
+  original_digest=$(gh api "repos/$repo/releases/$id" \
+    --jq ".assets[] | select(.name == \"$version_name\") | .digest")
+  expected_original_hash=$(gh api "repos/$repo/releases/$id" \
+    --jq '.body' | sed -n 's/^PDF SHA-256: \([0-9a-f]\{64\}\)$/\1/p')
   [[ "$original_size" =~ ^[1-9][0-9]*$ ]] || fail "Legacy PDF is missing or empty"
+  [[ -n "$expected_original_hash" && "$original_digest" == "sha256:$expected_original_hash" ]] ||
+    fail "Legacy PDF digest differs from the SHA-256 recorded at build time"
   gh api -X PATCH "repos/$repo/releases/$id" \
     -F draft=false -f make_latest=false --jq '.tag_name' >/dev/null
   local published_sha
