@@ -116,23 +116,20 @@ Senior Cloud \& Platform Operations Engineer with 10+ years of experience drivin
 
 \cvsection{Skills}
 
-% Compact category-colored skill matrix: one block instead of individual badges.
+% Balanced two-column category matrix, with a single subtle border.
 \begin{tcolorbox}[
   colback=white, colframe=heading!35, boxrule=0.4pt,
-  arc=2pt, left=6pt, right=6pt, top=5pt, bottom=5pt, boxsep=0pt
+  arc=2pt, left=8pt, right=8pt, top=8pt, bottom=8pt, boxsep=0pt
 ]
 \footnotesize
-\renewcommand{\arraystretch}{1.22}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}X@{}}
-  \textcolor{pythonbrand}{\textbf{Scripting \& Tools}} & Go, Python, PowerShell, Bash/Shell, Git \\
-  \textcolor{azure}{\textbf{Cloud}} & AWS, Azure, Google Cloud \\
-  \textcolor{kubernetes}{\textbf{Containers}} & Docker, Kubernetes, OpenShift, containerd, Podman, Helm \\
-  \textcolor{terraform}{\textbf{Infrastructure as Code}} & Terraform, Bicep, Ansible \\
-  \textcolor{gitbrand}{\textbf{Delivery \& Automation}} & Azure DevOps, GitHub Actions, GitLab CI, Jenkins, ArgoCD \\
-  \textcolor{datadog}{\textbf{Observability}} & Datadog, New Relic, Prometheus, Grafana \\
-  \textcolor{mssql}{\textbf{Databases}} & SQL Server, PostgreSQL, MongoDB, Oracle \\
-  \textcolor{nginx}{\textbf{Networking \& Web}} & Nginx, Traefik \\
-  \textcolor{heading}{\textbf{Systems \& Collaboration}} & Linux, Windows, Markdown, Confluence, Jira
+\newcommand{\cvskillgroup}[3]{\textcolor{#1}{\bfseries #2}\newline #3}
+\renewcommand{\arraystretch}{1.55}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X@{\hspace{1.4em}}>{\raggedright\arraybackslash}X@{}}
+  \cvskillgroup{azure}{Cloud}{AWS, Azure, Google Cloud} & \cvskillgroup{kubernetes}{Containers \& Orchestration}{Docker, Kubernetes, OpenShift, containerd, Podman, Helm} \\
+  \cvskillgroup{pythonbrand}{Scripting \& Tools}{Go, Python, PowerShell, Bash/Shell, Git} & \cvskillgroup{terraform}{Infrastructure as Code}{Terraform, Bicep, Ansible} \\
+  \cvskillgroup{gitbrand}{Delivery \& Automation}{Azure DevOps, GitHub Actions, GitLab CI, Jenkins, ArgoCD} & \cvskillgroup{datadog}{Observability}{Datadog, New Relic, Prometheus, Grafana} \\
+  \cvskillgroup{mssql}{Databases}{SQL Server, PostgreSQL, MongoDB, Oracle} & \cvskillgroup{nginx}{Networking \& Web}{Nginx, Traefik} \\
+  \cvskillgroup{heading}{Operating Systems}{Linux, Windows} & \cvskillgroup{confluence}{Collaboration}{Markdown, Confluence, Jira}
 \end{tabularx}
 \end{tcolorbox}
 
