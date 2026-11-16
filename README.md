@@ -9,7 +9,7 @@ The resume is maintained in LaTeX and uses GitHub Actions to automate PDF genera
 - **LaTeX-based resume:** Structured and customizable source code using AltaCV.
 - **Professional layout:** Custom typography, category-colored skills, and linked certifications.
 - **Automated builds:** PDF compilation and pull request validation using XeLaTeX and GitHub Actions.
-- **Versioned releases:** Each successful publication from `main` creates a numbered GitHub release linked to its source commit, while previous versions remain available.
+- **Versioned releases:** Each successful publication from `main` creates a timestamped release (`YYYYMMDDHHMM`, Mexico City time) linked to its source commit, while older releases remain available.
 - **Source control:** Resume content, styling, and build configuration maintained in Git.
 
 ## Repository Structure
@@ -17,6 +17,8 @@ The resume is maintained in LaTeX and uses GitHub Actions to automate PDF genera
 ```text
 .
 ├── .github/
+│   ├── scripts/
+│   │   └── publish-resume.sh
 │   └── workflows/
 │       └── build-resume.yaml
 ├── .gitignore
@@ -34,6 +36,7 @@ The resume is maintained in LaTeX and uses GitHub Actions to automate PDF genera
 | `avatar.jpg` | Profile image used in the resume |
 | `leftovers.txt` | Historical LaTeX snippets retained for reference |
 | `.github/workflows/build-resume.yaml` | Automated PDF build and release workflow |
+| `.github/scripts/publish-resume.sh` | Release publishing by ID, dated tags and legacy draft recovery |
 | `.gitignore` | Excludes generated LaTeX files and PDFs from version control |
 
 ## Local Compilation
@@ -77,17 +80,18 @@ The workflow is defined in:
 The workflow is configured to execute:
 
 - On pull requests targeting `main` (validation only; no release is published).
-- On pushes to `main` that change `.tex`, `.cls`, images (`.png`, `.jpg`, `.jpeg`), fonts (`.ttf`, `.otf`), or the workflow configuration.
+- On pushes to `main` that change `.tex`, `.cls`, images (`.png`, `.jpg`, `.jpeg`), fonts (`.ttf`, `.otf`), the workflow configuration, or the publisher script.
 - Through manual execution using `workflow_dispatch` (publishing is restricted to runs from `main`).
 
 ### Build and Release Process
 
 1. **Build:** Check out the repository and compile `resume.tex` with XeLaTeX using TeX Live 2024.
 2. Verify that `resume.pdf` exists and is a valid, nonempty PDF.
-3. Upload the validated PDF as a GitHub Actions artifact (seven-day retention).
+3. Validate essential ATS-readable text, page count, and release script syntax; upload the PDF as a seven-day GitHub Actions artifact.
 4. **Publish:** For eligible runs from `main` only, download the validated artifact without recompiling.
-5. Create a numbered release (`v1`, `v2`, etc.) for the exact source commit, using a draft until the PDF asset has been checked.
-6. Mark the published version as GitHub's Latest release. Existing published versions remain unchanged.
+5. Create or resume a draft release by its numeric release ID, targeting the exact source commit. Use the Mexico City publication timestamp (`YYYYMMDDHHMM`) as the release tag.
+6. Upload and verify two assets: a stable `latest` filename and a timestamped PDF. Publish the completed draft as GitHub's Latest release without changing previously published versions.
+7. For the original interrupted `v1` draft, recover its existing PDF and timestamp as a historical release without rebuilding it.
 
 Pull requests run only the read-only build job. Release publication uses write permissions exclusively in the publishing job. A rerun of an already-published source commit does not create a second version.
 
@@ -99,13 +103,14 @@ The workflow is configured to publish the most recent PDF through a versioned Gi
 
 **Direct PDF:** [resume.rafael.camacho.latest.pdf](https://github.com/LordOverlord/public-resume-rcm/releases/latest/download/resume.rafael.camacho.latest.pdf)
 
-**Published filename:**
+**Files attached to a new release:**
 
 ```text
 resume.rafael.camacho.latest.pdf
+resume.rafael.camacho.YYYYMMDDHHMM.pdf
 ```
 
-Previous versions, when available, are retained under numbered releases.
+The dated filename is unique per publication minute in the `America/Mexico_City` timezone. Publishing the same source commit again is idempotent; if a different commit uses the same minute, the job waits until a free minute. The historical `v1` draft is migrated to its original timestamp with its already-uploaded PDF, not regenerated.
 
 ## Contact
 
